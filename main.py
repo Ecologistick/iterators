@@ -3,8 +3,10 @@ import json
 
 class Iteration:
 
-  def __init__(self, start, end, data):
-    self.start, self.end = start-1, end
+  def __init__(self, data):
+    with open(data) as f:
+      open_data = json.load(f)
+    self.start, self.end, self.data = 0, len(open_data), open_data
     
   def __iter__(self):
     return self
@@ -13,24 +15,18 @@ class Iteration:
     self.start += 1
     if self.start == self.end:
       raise StopIteration
-    return self.start
+    country_name = self.data[self.start]['name']['common']
+    country_link = "https://en.wikipedia.org/wiki/" + country_name.replace(" ", "_") 
+    final_link = country_name + ' - ' + country_link
+    return self.start, final_link
 
-
-
-def open_file(file):
-  with open(file) as f:
-    data = json.load(f)
-  return data
-
-
-def create_link(country):
-  country = country.replace(" ", "_")
-  return "https://en.wikipedia.org/wiki/" + country
+ 
 
 
 if __name__ == '__main__':
-  f = open("links.txt", "w")
-  data =  open_file("countries.json")
-  for item in Iteration(0, len(data), "countries.json"):
-    f.write(data[item]['name']['common'] +' - ' + create_link(data[item]['name']['common']+ '\n'))
-  f.close()
+  with open('country_links.txt', 'w') as country_links_file:
+    for result in Iteration("countries.json"):
+      number, link = result
+      country_links_file.write(f'{link}\n')
+
+  
